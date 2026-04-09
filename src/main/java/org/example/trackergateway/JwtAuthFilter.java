@@ -25,8 +25,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private String jwtSecret;
 
     private static final List<String> OPEN_PATH = List.of(
-            "/api/auth/login",
-            "/api/auth/register"
+            "/auth/login",
+            "/auth/register"
     );
 
     @Override
