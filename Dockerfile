@@ -1,4 +1,14 @@
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
-COPY build/libs/*.jar tracker-gateway-0.0.1-SNAPSHOT.jar
-ENTRYPOINT ["java","-jar","/app/tracker-gateway-0.0.1-SNAPSHOT.jar"]
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+RUN ./gradlew dependencies -q
+COPY src ./src
+RUN ./gradlew bootJar -x test -q
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
