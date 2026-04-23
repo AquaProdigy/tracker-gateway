@@ -4,7 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -15,19 +17,35 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter implements GlobalFilter, Ordered {
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String KEY_USERID = "userId";
+    private static final String KEY_HEADER_USERID = "X-User-Id";
+    private static final String BEARER_STARTWITH_TOKEN = "Bearer ";
+    private static final Integer TOKEN_SUBSTRING_LENGTH = 7;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    private SecretKey signingKey;
 
     private static final List<String> OPEN_PATH = List.of(
             "/auth/login",
             "/auth/register"
     );
+
+    @PostConstruct
+    private void init() {
+        this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        log.info("JWT Signing Key initialized successfully.");
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -39,18 +57,18 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
         String header = exchange.getRequest()
                 .getHeaders()
-                .getFirst("Authorization");
+                .getFirst(AUTH_HEADER);
 
-        if (header == null || !header.startsWith("Bearer ")) {
+        if (header == null || !header.startsWith(BEARER_STARTWITH_TOKEN)) {
             return unauthorized(exchange);
         }
 
-        String token = header.substring(7);
+        String token = header.substring(TOKEN_SUBSTRING_LENGTH);
 
         Claims claims;
         try {
             claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+                    .verifyWith(signingKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
@@ -58,11 +76,15 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange);
         }
 
-        Long userId = claims.get("userId", Long.class);
+        Long userId = claims.get(KEY_USERID, Long.class);
+
+        if (userId == null) {
+            return unauthorized(exchange);
+        }
 
         ServerHttpRequest mutated = exchange.getRequest().mutate()
-                .headers(h -> h.remove("X-User-Id"))
-                .header("X-User-Id", userId.toString())
+                .headers(h -> h.remove(KEY_HEADER_USERID))
+                .header(KEY_HEADER_USERID, userId.toString())
                 .build();
 
         return chain.filter(exchange.mutate().request(mutated).build());
@@ -75,6 +97,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1; // выполняется первым
+        return -1;
     }
 }

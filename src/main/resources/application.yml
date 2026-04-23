@@ -14,24 +14,29 @@ spring:
             allowCredentials: false
       routes:
         - id: auth-service
-          uri: http://localhost:8081
+          uri: http://auth-service:8081
           predicates:
             - Path=/auth/**
 
         - id: auth-internal
-          uri: http://localhost:8081
+          uri: http://auth-service:8081
           predicates:
             - Path=/internal/users/**
 
+        - id: auth-user-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/user/**
+
         - id: task-service
-          uri: http://localhost:8082
+          uri: http://task-service:8082
           predicates:
             - Path=/tasks/**
 
         - id: task-internal
-          uri: http://localhost:8082
+          uri: http://task-service:8082
           predicates:
             - Path=/internal/tasks/**
 
 jwt:
-  secret: "123456789123456789werwefdsvwdvwwfwe"
+  secret: ${JWT_SECRET}
