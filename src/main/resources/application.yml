@@ -17,12 +17,6 @@ spring:
           uri: http://auth-service:8081
           predicates:
             - Path=/auth/**
-
-        - id: auth-internal
-          uri: http://auth-service:8081
-          predicates:
-            - Path=/internal/users/**
-
         - id: auth-user-service
           uri: http://auth-service:8081
           predicates:
@@ -32,11 +26,6 @@ spring:
           uri: http://task-service:8082
           predicates:
             - Path=/tasks/**
-
-        - id: task-internal
-          uri: http://task-service:8082
-          predicates:
-            - Path=/internal/tasks/**
 
 jwt:
   secret: ${JWT_SECRET}
