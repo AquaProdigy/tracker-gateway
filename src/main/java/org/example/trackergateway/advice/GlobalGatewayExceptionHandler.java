@@ -3,6 +3,7 @@ package org.example.trackergateway.advice;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -16,9 +17,10 @@ import reactor.core.publisher.Mono;
 
 @Component
 @Order(-1)
+@RequiredArgsConstructor
 public class GlobalGatewayExceptionHandler implements ErrorWebExceptionHandler {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
