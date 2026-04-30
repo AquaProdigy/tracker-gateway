@@ -14,16 +14,16 @@ spring:
             allowCredentials: false
       routes:
         - id: auth-service
-          uri: http://auth-service:8081
+          uri: ${AUTH_SERVICE_URL}
           predicates:
             - Path=/auth/**
         - id: auth-user-service
-          uri: http://auth-service:8081
+          uri: ${AUTH_SERVICE_URL}
           predicates:
             - Path=/user/**
 
         - id: task-service
-          uri: http://task-service:8082
+          uri: ${TASK_SERVICE_URL}
           predicates:
             - Path=/tasks/**
 
