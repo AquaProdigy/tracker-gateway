@@ -36,10 +36,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private final SecretKey signingKey;
     private final AntPathMatcher antPathMatcher;
-    private final JwtProperties jwtProperties;
 
     public JwtAuthFilter(JwtProperties jwtProperties) {
-        this.jwtProperties = jwtProperties;
         this.antPathMatcher = new AntPathMatcher();
         this.signingKey = Keys.hmacShaKeyFor(
                 jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8)
