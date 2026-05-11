@@ -1,0 +1,21 @@
+package org.example.trackergateway.config;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
+
+@Configuration
+@ConfigurationProperties(prefix = "jwt")
+@Getter
+@Setter
+@Validated
+public class JwtProperties {
+    @NotBlank
+    private String secretKey;
+    @Positive
+    private Long expiration;
+}
