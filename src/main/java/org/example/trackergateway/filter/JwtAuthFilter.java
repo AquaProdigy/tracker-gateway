@@ -32,7 +32,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private static final String KEY_USERID = "userId";
     private static final String KEY_HEADER_USERID = "X-User-Id";
     private static final String BEARER_STARTWITH_TOKEN = "Bearer ";
-    private static final Integer TOKEN_SUBSTRING_LENGTH = 7;
 
     private final SecretKey signingKey;
     private final AntPathMatcher antPathMatcher;
@@ -66,7 +65,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange);
         }
 
-        String token = header.substring(TOKEN_SUBSTRING_LENGTH);
+        String token = header.substring(BEARER_STARTWITH_TOKEN.length());
 
         Claims claims;
         try {
